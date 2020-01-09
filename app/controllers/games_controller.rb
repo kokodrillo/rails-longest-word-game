@@ -2,32 +2,30 @@ require 'open-uri'
 require 'json'
 
 class GamesController < ApplicationController
-     def new
-        @letters = (0..10).map { ('a'..'z').to_a[rand(26)] }
-      end
+  def new
+    @letters = (0..10).map { ('a'..'z').to_a[rand(26)] }
+  end
 
+  def score
+    @letters = params[:letters].split
+    @word = (params[:word] || "").upcase
+    @included = included?(@word, @letters)
+    @english_word = english_word?(@word)
+  end
 
-      def score
-          @letters = params[:letters].split
-          @word = (params[:word] || "").upcase
-          @included = included?(@word, @letters)
-          @english_word = english_word?(@word)
-        end
+  private
+  def included?(word, letters)
+    word.chars.all? { |letter| word.count(letter) <= letters.count(letter) }
+  end
 
-        private
-
-        def included?(word, letters)
-          word.chars.all? { |letter| word.count(letter) <= letters.count(letter) }
-        end
-
-        def english_word?(word)
-          response = open("https://wagon-dictionary.herokuapp.com/#{word}")
-          json = JSON.parse(response.read)
-          json['found']
-        end
-      end
+  def english_word?(word)
+    response = open("https://wagon-dictionary.herokuapp.com/#{word}")
+    json = JSON.parse(response.read)
+    json['found']
+  end
+end
   #     def included?(guess, grid)
-  #       guess.chars.all? { |letter| guess.count(letter) <= grid.count(letter) }
+  #       guess.chars.all? { |letter| guess.count(letter) <= grid.count(letter)}
   #     end
 
   #     def compute_score(attempt, time_taken)
@@ -62,7 +60,4 @@ class GamesController < ApplicationController
   #     json = JSON.parse(response.read)
   #     return json['found']
   #   end
-  # end
-
-
 
